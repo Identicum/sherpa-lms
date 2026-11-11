@@ -1,0 +1,33 @@
+name: sherpa-lms
+
+# Local development: "proxy" stands in for IPAx and injects fixed identity headers.
+# Change LOCAL_ROLES and run "docker compose up -d proxy" to see the dashboard for other roles.
+services:
+    lms:
+        container_name: lms
+        build: .
+        image: ghcr.io/identicum/sherpa-lms:latest
+        restart: always
+        ports:
+            - 8000:5000
+        environment:
+            LOG_LEVEL: DEBUG
+            SELFSERVICE_URL: https://selfservice.example.com
+        volumes:
+            - ./app/:/app/
+
+    proxy:
+        container_name: proxy
+        image: nginx:alpine
+        restart: always
+        ports:
+            - 80:80
+        environment:
+            LOCAL_USERNAME: jlennon
+            LOCAL_NAME: John Lennon
+            LOCAL_EMAIL: jlennon@example.com
+            LOCAL_ROLES: ${LOCAL_ROLES:-LMS_STUDENT|SOME_OTHER_ROLE}
+        volumes:
+            - ./localhost/proxy/default.conf.template:/etc/nginx/templates/default.conf.template:ro
+        depends_on:
+            - lms

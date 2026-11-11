@@ -1,0 +1,37 @@
+<details class="card tech mt-4">
+    <summary class="card-header bg-white py-2 text-muted small" style="cursor: pointer;">
+        <i class="bi bi-code-slash me-1"></i>Detalle técnico
+    </summary>
+    <div class="card-body small">
+        <p class="text-muted mb-2">Headers HTTP que recibe la aplicación desde IPAx. La aplicación no autentica: confía en estos headers.</p>
+        <table class="table table-sm align-middle mb-3">
+            <thead><tr><th style="width: 30%">Header</th><th>Valor</th></tr></thead>
+            <tbody>
+            {% for name, value in g.tech_headers %}
+                <tr>
+                    <td><code>{{ name }}</code></td>
+                    <td>{% if value %}<pre>{{ value }}</pre>{% else %}<span class="text-muted fst-italic">(no recibido)</span>{% endif %}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <p class="text-muted mb-2">Roles en <code>{{ header_roles }}</code> (separador <code>{{ roles_separator }}</code>) y secciones que habilita cada rol LMS:</p>
+        <table class="table table-sm align-middle mb-0">
+            <thead><tr><th style="width: 30%">Rol</th><th>Sección</th><th class="text-end">Estado</th></tr></thead>
+            <tbody>
+            {% for s in role_sections %}
+                {% set granted = s.role in g.lms_roles %}
+                <tr>
+                    <td><code>{{ s.role }}</code></td>
+                    <td>{{ s.section }}</td>
+                    <td class="text-end">{% if granted %}<span class="badge text-bg-success"><i class="bi bi-check-lg"></i> Asignado</span>{% else %}<span class="badge text-bg-light border text-muted"><i class="bi bi-lock"></i> No asignado</span>{% endif %}</td>
+                </tr>
+            {% endfor %}
+            {% set other = g.roles | reject("in", role_sections | map(attribute="role") | list) | list %}
+            {% if other %}
+                <tr><td colspan="3" class="text-muted">Otros roles recibidos (ignorados por el LMS): {% for r in other %}<code>{{ r }}</code>{% if not loop.last %}, {% endif %}{% endfor %}</td></tr>
+            {% endif %}
+            </tbody>
+        </table>
+    </div>
+</details>

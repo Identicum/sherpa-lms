@@ -1,0 +1,20 @@
+# Local stand-in for IPAx: no OIDC, just injects fixed identity headers.
+server {
+	listen 80;
+
+	# IPAx handles /private/logout; here it just goes back to the app.
+	location = /private/logout {
+		return 302 /;
+	}
+
+	location / {
+		proxy_pass http://lms:5000/;
+		proxy_set_header Host $host;
+		proxy_set_header X-Forwarded-Proto $scheme;
+		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+		proxy_set_header IPAx-USERNAME "${LOCAL_USERNAME}";
+		proxy_set_header IPAx-NAME "${LOCAL_NAME}";
+		proxy_set_header IPAx-EMAIL "${LOCAL_EMAIL}";
+		proxy_set_header IPAx-ROLES "${LOCAL_ROLES}";
+	}
+}
